@@ -1,0 +1,38 @@
+name: dbt-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # ingest（06:17 JST）の後に最新 raw で検証し、上流のスキーマ変化による破損を早期に検知する
+    - cron: "47 22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout raw data repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/oss-github-data
+          path: _raw
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: dbt build
+        run: |
+          uv run dbt deps
+          uv run dbt build
+        env:
+          RAW_DATA_PATH: ${{ github.workspace }}/_raw/data/raw

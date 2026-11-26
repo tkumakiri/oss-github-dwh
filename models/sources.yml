@@ -1,0 +1,21 @@
+version: 2
+
+# raw 層（oss-github-data リポジトリの data/raw）を外部テーブルとして参照する。
+# RAW_DATA_PATH 既定値: 隣に clone した ../oss-github-data/data/raw
+# union_by_name: 日によって列が増減しても（スキーマ進化）読めるようにする
+# hive_partitioning: パス中の dt=YYYY-MM-DD を dt 列として読む
+sources:
+  - name: github_raw
+    description: "GitHub API から dlt で取得した raw データ（append-only）。詳細は oss-github-data/docs/adr を参照。"
+    config:
+      meta:
+        external_location: "read_parquet('{{ env_var('RAW_DATA_PATH', '../oss-github-data/data/raw') }}/github/{name}/**/*.parquet', union_by_name = true, hive_partitioning = true)"
+    tables:
+      - name: repositories
+        description: "対象リポジトリの日次スナップショット（毎回全量）"
+      - name: repositories__topics
+        description: "repositories.topics の展開（_dlt_parent_id で親に紐づく）"
+      - name: issues
+        description: "Issue / PR の増分取得結果（updated_at 基準）。同一 id が複数回出現しうる"
+      - name: releases
+        description: "リリースの増分取得結果（created_at 基準）"
