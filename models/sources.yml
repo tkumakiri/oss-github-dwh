@@ -17,5 +17,11 @@ sources:
         description: "repositories.topics の展開（_dlt_parent_id で親に紐づく）"
       - name: issues
         description: "Issue / PR の増分取得結果（updated_at 基準）。同一 id が複数回出現しうる"
+      - name: issues__labels
+        description: "issues.labels の展開（_dlt_parent_id で issues._dlt_id に紐づく）"
+      - name: issues__assignees
+        description: "issues.assignees の展開（_dlt_parent_id で issues._dlt_id に紐づく）"
       - name: releases
         description: "リリースの増分取得結果（created_at 基準）"
+      - name: releases__assets
+        description: "releases.assets の展開（_dlt_parent_id で releases._dlt_id に紐づく）"
